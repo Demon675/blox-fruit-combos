@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blox Fruits Combos Lexikon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-sizing: border-box;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .form-container {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            margin-bottom: 10px;
+        }
+        input, textarea {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .moderated {
+            background-color: #f39c12;
+            color: white;
+            font-weight: bold;
+        }
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        .admin-login {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .admin-login input {
+            width: 200px;
+        }
+        .admin-login button {
+            background-color: #2ecc71;
+        }
+        .admin-options {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Blox Fruits Combos Lexikon</h1>
+    
+    <!-- Admin Login Form -->
+    <div class="admin-login" id="adminLogin">
+        <h2>Admin Login</h2>
+        <input type="password" id="adminPassword" placeholder="Admin Passwort">
+        <button onclick="adminLogin()">Einloggen</button>
+    </div>
+
+    <!-- Admin Options -->
+    <div class="admin-options" id="adminOptions">
+        <h3>Admin-Funktionen</h3>
+        <button onclick="promoteToAdmin()">Als Admin markieren</button>
+    </div>
+
+    <!-- Combo-Formular (für alle Benutzer zugänglich) -->
+    <div class="form-container" id="comboFormContainer">
+        <form id="comboForm">
+            <label for="comboName">Combo-Name:</label>
+            <input type="text" id="comboName" name="comboName" required>
+
+            <label for="comboDescription">Beschreibung:</label>
+            <textarea id="comboDescription" name="comboDescription" rows="4" required></textarea>
+
+            <label for="comboVideo">Video-Link (optional):</label>
+            <input type="url" id="comboVideo" name="comboVideo">
+
+            <button type="submit">Combo hinzufügen</button>
+        </form>
+    </div>
+
+    <!-- Combo-Tabelle -->
+    <table id="comboTable">
+        <thead>
+            <tr>
+                <th>Combo-Name</th>
+                <th>Beschreibung</th>
+                <th>Video-Link</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Hier werden die Combos dynamisch hinzugefügt -->
+        </tbody>
+    </table>
+
+    <script>
+        const form = document.getElementById('comboForm');
+        const tableBody = document.querySelector('#comboTable tbody');
+        const adminLoginContainer = document.getElementById('adminLogin');
+        const comboFormContainer = document.getElementById('comboFormContainer');
+        const adminOptions = document.getElementById('adminOptions');
+        const adminPassword = 'admin123'; // Admin Passwort
+        let isAdmin = false;
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+
+        // Checken, ob der Benutzer Admin ist
+        function checkAdminStatus() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser && users.includes(currentUser)) {
+                isAdmin = true;
+                adminLoginContainer.style.display = 'none';
+                comboFormContainer.style.display = 'block';
+                adminOptions.style.display = 'block';
+            } else {
+                comboFormContainer.style.display = 'block';
+            }
+        }
+
+        // Admin Login Funktion
+        function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === adminPassword) {
+                isAdmin = true;
+                alert('Erfolgreich eingeloggt!');
+                localStorage.setItem('currentUser', 'admin'); // Admin speichern
+                adminLoginContainer.style.display = 'none';
+                comboFormContainer.style.display = 'block';
+                adminOptions.style.display = 'block';
+            } else {
+                alert('Falsches Passwort!');
+            }
+        }
+
+        // Funktion um einen Benutzer zum Admin zu machen
+        function promoteToAdmin() {
+            const username = prompt('Gib den Benutzernamen ein, den du zum Admin machen möchtest:');
+            if (username && !users.includes(username)) {
+                users.push(username);
+                localStorage.setItem('users', JSON.stringify(users));
+                alert(`${username} wurde zum Admin gemacht!`);
+            } else {
+                alert('Dieser Benutzer existiert nicht oder ist bereits Admin.');
+            }
+        }
+
+        // Formular Absenden
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const comboName = document.getElementById('comboName').value;
+            const comboDescription = document.getElementById('comboDescription').value;
+            const comboVideo = document.getElementById('comboVideo').value;
+
+            const row = document.createElement('tr');
+
+            const nameCell = document.createElement('td');
+            nameCell.textContent = comboName;
+            row.appendChild(nameCell);
+
+            const descriptionCell = document.createElement('td');
+            descriptionCell.textContent = comboDescription;
+            row.appendChild(descriptionCell);
+
+            const videoCell = document.createElement('td');
+            if (comboVideo) {
+                const videoLink = document.createElement('a');
+                videoLink.href = comboVideo;
+                videoLink.textContent = 'Zum Video';
+                videoCell.appendChild(videoLink);
+            } else {
+                videoCell.textContent = 'Kein Video';
+            }
+            row.appendChild(videoCell);
+
+            // Moderation und Lösch-Button nur für Admins sichtbar
+            const actionsCell = document.createElement('td');
+            if (isAdmin) {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Löschen';
+                deleteBtn.classList.add('delete-btn');
+                deleteBtn.onclick = () => deleteRow(row);
+                actionsCell.appendChild(deleteBtn);
+            }
+            row.appendChild(actionsCell);
+
+            tableBody.appendChild(row);
+            form.reset();
+        });
+
+        // Löschen der Combo
+        function deleteRow(row) {
+            row.remove();
+        }
+
+        // Initial Check Admin Status
+        checkAdminStatus();
+
+    </script>
+
+</body>
+</html>
